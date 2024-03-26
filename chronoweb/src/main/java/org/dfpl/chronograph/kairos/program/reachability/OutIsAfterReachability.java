@@ -67,7 +67,7 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
 
     @Override
     public void onAddEdgeEvent(EdgeEvent addedEvent) {
-        File resultFile = new File("D:\\tpvis\\results\\CollegeMsg.txt");
+        File resultFile = new File("C:\\Users\\haifa\\Desktop\\results\\CollegeMsg.txt");
         try {
             FileWriter resultFW = new FileWriter(resultFile, true);
             BufferedWriter resultBW = new BufferedWriter(resultFW);
@@ -75,29 +75,12 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
 
             long pre = System.currentTimeMillis();
 
-            Vertex iPrime = addedEvent.getVertex(Direction.OUT);
-            Vertex jPrime = addedEvent.getVertex(Direction.IN);
-
-            // Step 1: Computing affected subgraph
-            VertexEvent sourcePrime = new MChronoVertexEvent(jPrime, addedEvent.getTime());
-            String gammaPrimePath = String.format("%s\\onAdd\\%s", ((FixedSizedGammaTable<String, Long>) this.gammaTable).getDirectory().getPath(), sourcePrime.getId());
-
-            try {
-                TraversalReachability algorithm = new TraversalReachability(gammaPrimePath);
-                Map<String, LongGammaElement> gammaPrime = new HashMap<>();
-                algorithm.compute(this.graph, sourcePrime, TR, this.edgeLabel)
-                        .toMap(true).entrySet().stream().filter(entry -> entry.getValue() != null)
-                        .forEach(entry -> {
-                            gammaPrime.put(entry.getKey(), new LongGammaElement(entry.getValue()));
-                        });
-
-                // Step 2: Updating the Gamma Table
-                ((FixedSizedGammaTable) this.gammaTable).update(iPrime.getId(), IS_SOURCE_VALID, addedEvent.getTime(), gammaPrime, IS_AFTER);
-
-                algorithm.getGammaTable().clear();
-
-            } catch (NotDirectoryException | FileNotFoundException e) {
-                e.printStackTrace();
+            synchronized (this.gammaTable) {
+                if (graph instanceof MChronoGraph)
+                    onAddEdgeEventFile(addedEvent);
+                else if (graph instanceof PChronoGraph) {
+                    onAddEdgeEventMongo(addedEvent);
+                }
             }
 
             long computationTime = System.currentTimeMillis() - pre;
@@ -111,8 +94,39 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private void onAddEdgeEventFile(EdgeEvent addedEvent) {
+        Vertex iPrime = addedEvent.getVertex(Direction.OUT);
+        Vertex jPrime = addedEvent.getVertex(Direction.IN);
 
+        // Step 1: Computing affected subgraph
+        VertexEvent sourcePrime = new MChronoVertexEvent(jPrime, addedEvent.getTime());
+        String gammaPrimePath = String.format("%s\\onAdd\\%s", ((FixedSizedGammaTable<String, Long>) this.gammaTable).getDirectory().getPath(), sourcePrime.getId());
+
+        try {
+            TraversalReachability algorithm = new TraversalReachability(gammaPrimePath);
+            Map<String, LongGammaElement> gammaPrime = new HashMap<>();
+            algorithm.compute(this.graph, sourcePrime, TR, this.edgeLabel)
+                    .toMap(true).entrySet().stream().filter(entry -> entry.getValue() != null)
+                    .forEach(entry -> {
+                        gammaPrime.put(entry.getKey(), new LongGammaElement(entry.getValue()));
+                    });
+
+            // Step 2: Updating the Gamma Table
+            ((FixedSizedGammaTable) this.gammaTable).update(iPrime.getId(), IS_SOURCE_VALID, addedEvent.getTime(), gammaPrime, IS_AFTER);
+
+            algorithm.getGammaTable().clear();
+        } catch (NotDirectoryException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void onAddEdgeEventMongo(EdgeEvent addedEvent) {
+        this.gammaTable.update(addedEvent.getVertex(Direction.OUT).getId(), IS_SOURCE_VALID,
+                addedEvent.getVertex(Direction.IN).getId(),
+                new LongGammaElement(addedEvent.getTime()), IS_AFTER
+        );
     }
 
     @Override
