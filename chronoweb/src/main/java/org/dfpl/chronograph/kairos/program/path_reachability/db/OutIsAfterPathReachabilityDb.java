@@ -40,25 +40,14 @@ public class OutIsAfterPathReachabilityDb extends AbstractKairosProgram<Document
                 gammaTable.set(id, id, new PathGammaElement(List.of(id), startTime));
             }
 
-            if (graph instanceof MChronoGraph mg) {
-                mg.getEdgeEvents().forEach(event -> {
-                    System.out.println("\t\t" + event);
-                    String out = event.getVertex(Direction.OUT).getId();
-                    String in = event.getVertex(Direction.IN).getId();
-                    gammaTable.append(sources.parallelStream().map(v -> v.getId()).collect(Collectors.toSet()), out,
-                            IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), event.getTime()), IS_AFTER);
-                    gammaTable.print();
-                });
-            } else if (graph instanceof PChronoGraph pg) {
-                pg.getEdgeEvents().forEach(event -> {
-                    System.out.println("\t\t" + event);
-                    String out = event.getVertex(Direction.OUT).getId();
-                    String in = event.getVertex(Direction.IN).getId();
-                    gammaTable.append(sources.parallelStream().map(v -> v.getId()).collect(Collectors.toSet()), out,
-                            IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), event.getTime()), IS_AFTER);
-                    gammaTable.print();
-                });
-            }
+            ((PChronoGraph) graph).getEdgeEvents().forEach(event -> {
+                System.out.println("\t\t" + event);
+                String out = event.getVertex(Direction.OUT).getId();
+                String in = event.getVertex(Direction.IN).getId();
+                gammaTable.append(sources.parallelStream().map(v -> v.getId()).collect(Collectors.toSet()), out,
+                        IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), event.getTime()), IS_AFTER);
+                gammaTable.print();
+            });
         }
     }
 
