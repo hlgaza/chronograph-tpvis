@@ -75,7 +75,7 @@ public class PathTest {
     }
 
     private static void postEdgeEvent(String from, String to, String time) throws IOException {
-        String postURLString = String.format("%s/graph/%s|label|%s_%s", HOST, from, to, time);
+        String postURLString = String.format("%s/graph/%s|label|%s_%s?updateOrReplaceProperties=replace&includeProperties=true", HOST, from, to, time);
         URL postURL = new URL(postURLString);
         HttpURLConnection postCon = (HttpURLConnection) postURL.openConnection();
         postCon.setRequestMethod("PUT");
