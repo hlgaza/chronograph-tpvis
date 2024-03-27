@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
-public class FileReachabilityTest {
+public class ReachabilityTest {
     static String HOST;
     static String EDGE_LABEL;
     static String KAIROS_PROGRAM_NAME;
@@ -53,7 +53,7 @@ public class FileReachabilityTest {
 
             postEdgeEvent(from, to, time);
 
-            TimeUnit.SECONDS.sleep(2);
+            TimeUnit.SECONDS.sleep(3);
 
             if (++lineRead % 10000 == 0)
                 System.out.println(lineRead + " lines read...");
