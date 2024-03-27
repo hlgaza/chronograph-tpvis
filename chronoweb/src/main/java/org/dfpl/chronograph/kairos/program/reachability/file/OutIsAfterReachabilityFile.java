@@ -60,7 +60,6 @@ public class OutIsAfterReachabilityFile extends AbstractKairosProgram<Long> {
             for (Vertex sourceVertex : sources) {
                 this.gammaTable.addSource(sourceVertex.getId(), new LongGammaElement(startTime));
             }
-
             new TimeCentricReachability(this.graph, this.gammaTable).compute(sources, startTime, TR, this.edgeLabel, true);
         }
     }
