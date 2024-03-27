@@ -61,15 +61,7 @@ public class OutIsAfterReachabilityFile extends AbstractKairosProgram<Long> {
                 this.gammaTable.addSource(sourceVertex.getId(), new LongGammaElement(startTime));
             }
 
-            if (graph instanceof MChronoGraph) {
-                new TimeCentricReachability(this.graph, this.gammaTable).compute(sources, startTime, TR, this.edgeLabel, true);
-            } else if (graph instanceof PChronoGraph pg) {
-                pg.getEdgeEvents().forEach(event -> {
-                    this.gammaTable.update(sources.parallelStream().map(Element::getId).collect(Collectors.toSet()),
-                            event.getVertex(Direction.OUT).getId(), IS_SOURCE_VALID, event.getVertex(Direction.IN).getId(),
-                            new LongGammaElement(event.getTime()), IS_AFTER);
-                });
-            }
+            new TimeCentricReachability(this.graph, this.gammaTable).compute(sources, startTime, TR, this.edgeLabel, true);
         }
     }
 
