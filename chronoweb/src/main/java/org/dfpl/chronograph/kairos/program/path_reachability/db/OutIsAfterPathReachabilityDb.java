@@ -1,4 +1,4 @@
-package org.dfpl.chronograph.kairos.program.path_reachability;
+package org.dfpl.chronograph.kairos.program.path_reachability.db;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,9 +21,9 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
-public class OutIsAfterPathReachability extends AbstractKairosProgram<Document> {
+public class OutIsAfterPathReachabilityDb extends AbstractKairosProgram<Document> {
 
-    public OutIsAfterPathReachability(Graph graph, GammaTable<String, Document> gammaTable) {
+    public OutIsAfterPathReachabilityDb(Graph graph, GammaTable<String, Document> gammaTable) {
         super(graph, gammaTable, "OutIsAfterPathReachability");
     }
 
