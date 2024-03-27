@@ -13,12 +13,11 @@ import org.dfpl.chronograph.common.VertexEvent;
 import org.dfpl.chronograph.kairos.AbstractKairosProgram;
 import org.dfpl.chronograph.kairos.KairosEngine;
 import org.dfpl.chronograph.kairos.gamma.GammaTable;
-import org.dfpl.chronograph.kairos.program.path_reachability.OutIsAfterPathReachability;
+import org.dfpl.chronograph.kairos.program.path_reachability.db.OutIsAfterPathReachabilityDb;
 import org.dfpl.chronograph.kairos.gamma.persistent.db.ExpandableGammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.FixedSizedGammaTable;
 import org.dfpl.chronograph.kairos.program.reachability.db.OutIsAfterReachabilityDb;
 import org.dfpl.chronograph.kairos.program.reachability.file.OutIsAfterReachabilityFile;
-import org.dfpl.chronograph.khronos.manipulation.memory.MChronoGraph;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertex;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertexEvent;
 import org.dfpl.chronograph.khronos.manipulation.persistent.PChronoGraph;
@@ -142,7 +141,7 @@ public class SubscriptionRouter extends BaseRouter {
                     if (gammaTable.getSources().contains(v.getId())) {
                         sendResult(routingContext, 406);
                     } else {
-                        kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterPathReachability(graph, gammaTable));
+                        kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterPathReachabilityDb(graph, gammaTable));
                         sendResult(routingContext, 200);
                     }
                 } else {
@@ -167,7 +166,7 @@ public class SubscriptionRouter extends BaseRouter {
                 } else if (kairosProgram.equals("OutIsAfterPathReachability")) {
                     ExpandableGammaTable gammaTable = null;
                     gammaTable = new ExpandableGammaTable(kairos.getGammaClient(), time + "_" + kairosProgram);
-                    kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterPathReachability(graph, gammaTable));
+                    kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterPathReachabilityDb(graph, gammaTable));
                     sendResult(routingContext, 200);
                 } else {
                     sendResult(routingContext, 500);
