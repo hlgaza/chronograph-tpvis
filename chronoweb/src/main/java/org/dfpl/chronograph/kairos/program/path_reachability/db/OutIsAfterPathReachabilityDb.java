@@ -1,5 +1,9 @@
 package org.dfpl.chronograph.kairos.program.path_reachability.db;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -53,12 +57,31 @@ public class OutIsAfterPathReachabilityDb extends AbstractKairosProgram<Document
 
     @Override
     public void onAddEdgeEvent(EdgeEvent addedEvent) {
-        synchronized (gammaTable) {
-            String out = addedEvent.getVertex(Direction.OUT).getId();
-            String in = addedEvent.getVertex(Direction.IN).getId();
-            gammaTable.update(out, IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), addedEvent.getTime()), IS_AFTER);
-            gammaTable.print();
+        File resultFile = new File("C:\\Users\\haifa\\Desktop\\results\\CollegeMsgDb.txt");
+
+        try {
+            FileWriter resultFW = new FileWriter(resultFile, true);
+            BufferedWriter resultBW = new BufferedWriter(resultFW);
+
+            long pre = System.currentTimeMillis();
+
+            synchronized (gammaTable) {
+                String out = addedEvent.getVertex(Direction.OUT).getId();
+                String in = addedEvent.getVertex(Direction.IN).getId();
+                gammaTable.update(out, IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), addedEvent.getTime()), IS_AFTER);
+                gammaTable.print();
+            }
+
+            long computationTime = System.currentTimeMillis() - pre;
+            resultBW.write(computationTime + "\n");
+
+            resultBW.close();
+            resultFW.close();
+
+        } catch (IOException e){
+            e.printStackTrace();
         }
+
     }
 
     @Override
