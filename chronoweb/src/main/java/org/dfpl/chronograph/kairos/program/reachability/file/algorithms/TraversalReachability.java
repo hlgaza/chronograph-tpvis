@@ -1,4 +1,4 @@
-package org.dfpl.chronograph.kairos.program.reachability.algorithms;
+package org.dfpl.chronograph.kairos.program.reachability.file.algorithms;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;

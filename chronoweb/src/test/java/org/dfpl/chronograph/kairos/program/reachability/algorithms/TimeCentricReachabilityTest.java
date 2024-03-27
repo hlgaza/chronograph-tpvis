@@ -7,15 +7,14 @@ import org.dfpl.chronograph.common.TemporalRelation;
 import org.dfpl.chronograph.common.VertexEvent;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.FixedSizedGammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.LongGammaElement;
+import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TimeCentricReachability;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoGraph;
-import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertex;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.NotDirectoryException;
-import java.time.temporal.Temporal;
 import java.util.Set;
 
 public class TimeCentricReachabilityTest {
