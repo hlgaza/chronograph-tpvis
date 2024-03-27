@@ -117,6 +117,7 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
             ((FixedSizedGammaTable) this.gammaTable).update(iPrime.getId(), IS_SOURCE_VALID, addedEvent.getTime(), gammaPrime, IS_AFTER);
 
             algorithm.getGammaTable().clear();
+
         } catch (NotDirectoryException | FileNotFoundException e) {
             e.printStackTrace();
         }

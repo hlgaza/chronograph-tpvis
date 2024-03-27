@@ -10,9 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.nio.Buffer;
 import java.util.concurrent.TimeUnit;
 
 public class FileReachabilityTest {
@@ -28,9 +26,9 @@ public class FileReachabilityTest {
         HOST = "http://localhost/chronoweb";
         EDGE_LABEL = "label";
         KAIROS_PROGRAM_NAME = "OutIsAfterReachability";
-        SOURCE_VERTEX_ID = "a";
+        SOURCE_VERTEX_ID = "8";
         SOURCE_TIME = "0";
-        GRAPH_FILE = "D:\\tpvis\\datasets\\CollegeMsg_test.txt";
+        GRAPH_FILE = "D:\\tpvis\\datasets\\CollegeMsg.txt";
     }
 
     @Test
@@ -55,7 +53,7 @@ public class FileReachabilityTest {
 
             postEdgeEvent(from, to, time);
 
-            TimeUnit.SECONDS.sleep(5);
+            TimeUnit.SECONDS.sleep(2);
 
             if (++lineRead % 10000 == 0)
                 System.out.println(lineRead + " lines read...");
@@ -93,5 +91,4 @@ public class FileReachabilityTest {
 
         postCon.disconnect();
     }
-
 }
