@@ -136,7 +136,9 @@ public class SubscriptionRouter extends BaseRouter {
                         kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterReachabilityDb(graph, gammaTable));
                         sendResult(routingContext, 200);
                     }
-                } else if (kairosProgram.equals("OutIsAfterPathReachability")) {
+                } else if (kairosProgram.equals("OutIsAfterPathReachability")&& Server.backendType.equals("memory")) {
+                    // TODO
+                } else if (kairosProgram.equals("OutIsAfterPathReachability")&& Server.backendType.equals("persistent")) {
                     GammaTable<String, Document> gammaTable = existing.getGammaTable();
                     if (gammaTable.getSources().contains(v.getId())) {
                         sendResult(routingContext, 406);
@@ -163,7 +165,9 @@ public class SubscriptionRouter extends BaseRouter {
                     GammaTable<String, Document> gammaTable = new ExpandableGammaTable(kairos.getGammaClient(), time + "_" + kairosProgram + "_" + edgeLabel);
                     kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterReachabilityDb(graph, gammaTable));
                     sendResult(routingContext, 200);
-                } else if (kairosProgram.equals("OutIsAfterPathReachability")) {
+                }  else if (kairosProgram.equals("OutIsAfterPathReachability")&& Server.backendType.equals("memory")) {
+                    // TODO
+                }else if (kairosProgram.equals("OutIsAfterPathReachability") && backendType.equals("persistent")) {
                     ExpandableGammaTable gammaTable = null;
                     gammaTable = new ExpandableGammaTable(kairos.getGammaClient(), time + "_" + kairosProgram);
                     kairos.addSubscription(v, ve.getTime(), edgeLabel, new OutIsAfterPathReachabilityDb(graph, gammaTable));
