@@ -66,9 +66,21 @@ public class OutIsAfterPathReachabilityDb extends AbstractKairosProgram<Document
             long pre = System.currentTimeMillis();
 
             synchronized (gammaTable) {
-                String out = addedEvent.getVertex(Direction.OUT).getId();
-                String in = addedEvent.getVertex(Direction.IN).getId();
-                gammaTable.update(out, IS_SOURCE_VALID, in, new PathGammaElement(List.of(in), addedEvent.getTime()), IS_AFTER);
+                gammaTable.getSources().forEach(source ->{
+                    String out = addedEvent.getVertex(Direction.OUT).getId();
+                    String in = addedEvent.getVertex(Direction.IN).getId();
+                    List<String> newPath;
+                    Document temp = this.gammaTable.getGamma(source).getElement(out);
+                    if (temp == null)
+                        newPath = List.of(in);
+                    else{
+                        newPath = temp.getList("path", String.class);
+                        newPath.add(in);
+                    }
+
+                    gammaTable.update(out, IS_SOURCE_VALID, in, new PathGammaElement(newPath, addedEvent.getTime()), IS_AFTER);
+                });
+
                 gammaTable.print();
             }
 
