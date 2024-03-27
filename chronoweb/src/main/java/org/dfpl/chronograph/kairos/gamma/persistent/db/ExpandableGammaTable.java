@@ -86,7 +86,7 @@ public class ExpandableGammaTable implements GammaTable<String, Document> {
 			if (updateDoc != null)
 				updateValue = updateDoc.get("_g", Document.class);
 
-			if (testUpdate.test(updateValue, newValue.getElement())) {
+			if (updateValue == null || testUpdate.test(updateValue, newValue.getElement())) {
 				col.replaceOne(new Document("_id", update),
 						new Document("_id", update).append("_g", newValue.getElement()),
 						new ReplaceOptions().upsert(true));
@@ -186,7 +186,9 @@ public class ExpandableGammaTable implements GammaTable<String, Document> {
 
 	@Override
 	public void addSource(String source, GammaElement<Document> element) {
+
 		database.createCollection(source);
+		this.set(source, source, element);
 	}
 
 	@Override

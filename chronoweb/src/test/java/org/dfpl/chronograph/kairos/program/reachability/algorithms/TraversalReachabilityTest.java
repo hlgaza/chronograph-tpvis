@@ -7,6 +7,7 @@ import org.dfpl.chronograph.common.TemporalRelation;
 import org.dfpl.chronograph.common.VertexEvent;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.FixedSizedGammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.LongGammaElement;
+import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TraversalReachability;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoGraph;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertex;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertexEvent;

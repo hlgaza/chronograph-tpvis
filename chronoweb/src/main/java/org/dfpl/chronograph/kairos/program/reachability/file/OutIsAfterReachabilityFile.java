@@ -1,4 +1,4 @@
-package org.dfpl.chronograph.kairos.program.reachability;
+package org.dfpl.chronograph.kairos.program.reachability.file;
 
 import com.tinkerpop.blueprints.*;
 import org.bson.Document;
@@ -9,8 +9,8 @@ import org.dfpl.chronograph.kairos.AbstractKairosProgram;
 import org.dfpl.chronograph.kairos.gamma.GammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.FixedSizedGammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.LongGammaElement;
-import org.dfpl.chronograph.kairos.program.reachability.algorithms.TimeCentricReachability;
-import org.dfpl.chronograph.kairos.program.reachability.algorithms.TraversalReachability;
+import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TimeCentricReachability;
+import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TraversalReachability;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoGraph;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertex;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertexEvent;
@@ -26,7 +26,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
+public class OutIsAfterReachabilityFile extends AbstractKairosProgram<Long> {
     public static final TemporalRelation TR = TemporalRelation.isAfter;
 
     /**
@@ -40,8 +40,16 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
     public static final BiPredicate<Long, Long> IS_AFTER = (t, u) -> u < t;
     private final static BiPredicate<Long, Long> IS_COTEMPORAL = (t, u) -> Objects.equals(u, t);
 
-    public OutIsAfterReachability(Graph graph, GammaTable<String, Long> gammaTable) {
+    public OutIsAfterReachabilityFile(Graph graph, GammaTable<String, Long> gammaTable) {
         super(graph, gammaTable, "OutIsAfterReachability");
+    }
+
+    public static FixedSizedGammaTable<String, Long> createGammaTable(String subDirectoryName) throws NotDirectoryException, FileNotFoundException {
+        File subDirectory = new File(subDirectoryName);
+        if (!subDirectory.exists())
+            subDirectory.mkdirs();
+
+        return new FixedSizedGammaTable<>(subDirectoryName, LongGammaElement.class);
     }
 
     @Override
@@ -67,19 +75,37 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
 
     @Override
     public void onAddEdgeEvent(EdgeEvent addedEvent) {
-        File resultFile = new File("C:\\Users\\haifa\\Desktop\\results\\CollegeMsg.txt");
+        File resultFile = new File("D:\\tpvis\\results\\CollegeMsgFile.txt");
         try {
             FileWriter resultFW = new FileWriter(resultFile, true);
             BufferedWriter resultBW = new BufferedWriter(resultFW);
-            StringBuilder header = new StringBuilder();
 
             long pre = System.currentTimeMillis();
 
             synchronized (this.gammaTable) {
-                if (graph instanceof MChronoGraph)
-                    onAddEdgeEventFile(addedEvent);
-                else if (graph instanceof PChronoGraph) {
-                    onAddEdgeEventMongo(addedEvent);
+                Vertex iPrime = addedEvent.getVertex(Direction.OUT);
+                Vertex jPrime = addedEvent.getVertex(Direction.IN);
+
+                // Step 1: Computing affected subgraph
+                VertexEvent sourcePrime = new MChronoVertexEvent(jPrime, addedEvent.getTime());
+                String gammaPrimePath = String.format("%s\\onAdd\\%s", ((FixedSizedGammaTable<String, Long>) this.gammaTable).getDirectory().getPath(), sourcePrime.getId());
+
+                try {
+                    TraversalReachability algorithm = new TraversalReachability(gammaPrimePath);
+                    Map<String, LongGammaElement> gammaPrime = new HashMap<>();
+                    algorithm.compute(this.graph, sourcePrime, TR, this.edgeLabel)
+                            .toMap(true).entrySet().stream().filter(entry -> entry.getValue() != null)
+                            .forEach(entry -> {
+                                gammaPrime.put(entry.getKey(), new LongGammaElement(entry.getValue()));
+                            });
+
+                    // Step 2: Updating the Gamma Table
+                    ((FixedSizedGammaTable) this.gammaTable).update(iPrime.getId(), IS_SOURCE_VALID, addedEvent.getTime(), gammaPrime, IS_AFTER);
+
+                    algorithm.getGammaTable().clear();
+
+                } catch (NotDirectoryException | FileNotFoundException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -89,45 +115,11 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
             resultBW.close();
             resultFW.close();
 
-            this.gammaTable.print();
+//            this.gammaTable.print();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void onAddEdgeEventFile(EdgeEvent addedEvent) {
-        Vertex iPrime = addedEvent.getVertex(Direction.OUT);
-        Vertex jPrime = addedEvent.getVertex(Direction.IN);
-
-        // Step 1: Computing affected subgraph
-        VertexEvent sourcePrime = new MChronoVertexEvent(jPrime, addedEvent.getTime());
-        String gammaPrimePath = String.format("%s\\onAdd\\%s", ((FixedSizedGammaTable<String, Long>) this.gammaTable).getDirectory().getPath(), sourcePrime.getId());
-
-        try {
-            TraversalReachability algorithm = new TraversalReachability(gammaPrimePath);
-            Map<String, LongGammaElement> gammaPrime = new HashMap<>();
-            algorithm.compute(this.graph, sourcePrime, TR, this.edgeLabel)
-                    .toMap(true).entrySet().stream().filter(entry -> entry.getValue() != null)
-                    .forEach(entry -> {
-                        gammaPrime.put(entry.getKey(), new LongGammaElement(entry.getValue()));
-                    });
-
-            // Step 2: Updating the Gamma Table
-            ((FixedSizedGammaTable) this.gammaTable).update(iPrime.getId(), IS_SOURCE_VALID, addedEvent.getTime(), gammaPrime, IS_AFTER);
-
-            algorithm.getGammaTable().clear();
-
-        } catch (NotDirectoryException | FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void onAddEdgeEventMongo(EdgeEvent addedEvent) {
-        this.gammaTable.update(addedEvent.getVertex(Direction.OUT).getId(), IS_SOURCE_VALID,
-                addedEvent.getVertex(Direction.IN).getId(),
-                new LongGammaElement(addedEvent.getTime()), IS_AFTER
-        );
     }
 
     @Override
@@ -222,5 +214,4 @@ public class OutIsAfterReachability extends AbstractKairosProgram<Long> {
     public void onRemoveVertexEvent(VertexEvent removedVertex) {
 
     }
-
 }
