@@ -93,7 +93,6 @@ public class OutIsAfterPathReachabilityDb extends AbstractKairosProgram<Document
         } catch (IOException e){
             e.printStackTrace();
         }
-
     }
 
     @Override
