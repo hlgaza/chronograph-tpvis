@@ -1,6 +1,9 @@
 package org.dfpl.chronograph.kairos.program.reachability.file;
 
-import com.tinkerpop.blueprints.*;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 import org.bson.Document;
 import org.dfpl.chronograph.common.EdgeEvent;
 import org.dfpl.chronograph.common.TemporalRelation;
@@ -11,10 +14,8 @@ import org.dfpl.chronograph.kairos.gamma.persistent.file.FixedSizedGammaTable;
 import org.dfpl.chronograph.kairos.gamma.persistent.file.LongGammaElement;
 import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TimeCentricReachability;
 import org.dfpl.chronograph.kairos.program.reachability.file.algorithms.TraversalReachability;
-import org.dfpl.chronograph.khronos.manipulation.memory.MChronoGraph;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertex;
 import org.dfpl.chronograph.khronos.manipulation.memory.MChronoVertexEvent;
-import org.dfpl.chronograph.khronos.manipulation.persistent.PChronoGraph;
 
 import java.io.*;
 import java.nio.file.NotDirectoryException;
